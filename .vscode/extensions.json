@@ -1,0 +1,31 @@
+{
+  "recommendations": [
+    // TypeScript / JavaScript
+    "ms-vscode.vscode-typescript-next",
+    "yoavbls.pretty-ts-errors",
+
+    // 코드 품질
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    "usernamehw.errorlens",
+
+    // CSS / Tailwind
+    "bradlc.vscode-tailwindcss",
+    "csstools.postcss",
+
+    // 파일 탐색
+    "christian-kohler.path-intellisense",
+    "mikestead.dotenv",
+
+    // API / DB 개발 도구
+    "rangav.vscode-thunder-client",
+    "alexcvzz.vscode-sqlite",
+
+    // Git
+    "eamodio.gitlens",
+
+    // 생산성
+    "Gruntfuggly.todo-tree",
+    "streetsidesoftware.code-spell-checker"
+  ]
+}

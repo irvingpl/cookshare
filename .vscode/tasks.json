@@ -1,0 +1,155 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    // ── 개발 서버 ──────────────────────────────────────────────────────────
+    {
+      "label": "dev: backend",
+      "type": "shell",
+      "command": "pnpm dev",
+      "options": { "cwd": "${workspaceFolder}/backend" },
+      "isBackground": true,
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "dedicated",
+        "group": "dev"
+      },
+      "problemMatcher": {
+        "owner": "ts-node",
+        "pattern": {
+          "regexp": "^(.*):(\\d+):(\\d+) - (error|warning) TS(\\d+): (.*)$",
+          "file": 1, "line": 2, "column": 3, "severity": 4, "code": 5, "message": 6
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "starting|restarting",
+          "endsPattern": "Listening on port \\d+"
+        }
+      }
+    },
+    {
+      "label": "dev: backend (inspect)",
+      "type": "shell",
+      "command": "node --inspect=9229 -r ts-node/register src/index.ts",
+      "options": {
+        "cwd": "${workspaceFolder}/backend",
+        "env": { "NODE_ENV": "development" }
+      },
+      "isBackground": true,
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "dedicated",
+        "group": "dev"
+      },
+      "problemMatcher": {
+        "owner": "ts-node",
+        "pattern": {
+          "regexp": "^(.*):(\\d+):(\\d+) - (error|warning) TS(\\d+): (.*)$",
+          "file": 1, "line": 2, "column": 3, "severity": 4, "code": 5, "message": 6
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "Debugger listening",
+          "endsPattern": "Listening on port \\d+"
+        }
+      }
+    },
+    {
+      "label": "dev: frontend",
+      "type": "shell",
+      "command": "pnpm dev",
+      "options": { "cwd": "${workspaceFolder}/frontend" },
+      "isBackground": true,
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "dedicated",
+        "group": "dev"
+      },
+      "problemMatcher": "$nextjs"
+    },
+    {
+      "label": "dev: all",
+      "dependsOn": ["dev: backend", "dev: frontend"],
+      "dependsOrder": "parallel",
+      "group": { "kind": "build", "isDefault": true },
+      "presentation": { "reveal": "silent" },
+      "problemMatcher": []
+    },
+
+    // ── 빌드 ───────────────────────────────────────────────────────────────
+    {
+      "label": "build: shared",
+      "type": "shell",
+      "command": "pnpm --filter @cookshare/shared build",
+      "options": { "cwd": "${workspaceFolder}" },
+      "presentation": { "reveal": "silent", "panel": "shared" },
+      "problemMatcher": "$tsc"
+    },
+    {
+      "label": "build: backend",
+      "type": "shell",
+      "command": "pnpm build",
+      "options": { "cwd": "${workspaceFolder}/backend" },
+      "dependsOn": ["build: shared"],
+      "presentation": { "reveal": "silent", "panel": "shared" },
+      "problemMatcher": "$tsc"
+    },
+    {
+      "label": "build: all",
+      "type": "shell",
+      "command": "pnpm build",
+      "options": { "cwd": "${workspaceFolder}" },
+      "group": "build",
+      "presentation": { "reveal": "always", "panel": "shared" },
+      "problemMatcher": "$tsc"
+    },
+
+    // ── 타입 검사 ──────────────────────────────────────────────────────────
+    {
+      "label": "typecheck: all",
+      "type": "shell",
+      "command": "pnpm typecheck",
+      "options": { "cwd": "${workspaceFolder}" },
+      "group": "test",
+      "presentation": { "reveal": "always", "panel": "shared" },
+      "problemMatcher": "$tsc"
+    },
+    {
+      "label": "typecheck: backend",
+      "type": "shell",
+      "command": "pnpm typecheck",
+      "options": { "cwd": "${workspaceFolder}/backend" },
+      "presentation": { "reveal": "always", "panel": "shared" },
+      "problemMatcher": "$tsc"
+    },
+    {
+      "label": "typecheck: frontend",
+      "type": "shell",
+      "command": "pnpm typecheck",
+      "options": { "cwd": "${workspaceFolder}/frontend" },
+      "presentation": { "reveal": "always", "panel": "shared" },
+      "problemMatcher": "$tsc"
+    },
+
+    // ── 기타 ───────────────────────────────────────────────────────────────
+    {
+      "label": "lint: frontend",
+      "type": "shell",
+      "command": "pnpm lint",
+      "options": { "cwd": "${workspaceFolder}/frontend" },
+      "group": "test",
+      "presentation": { "reveal": "always", "panel": "shared" },
+      "problemMatcher": ["$eslint-stylish"]
+    },
+    {
+      "label": "install: all",
+      "type": "shell",
+      "command": "pnpm install",
+      "options": { "cwd": "${workspaceFolder}" },
+      "presentation": { "reveal": "always", "panel": "shared" },
+      "problemMatcher": []
+    }
+  ]
+}

@@ -1,0 +1,85 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    // ── 백엔드 ─────────────────────────────────────────────────────────────
+    {
+      "name": "Debug: Backend",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["-r", "ts-node/register"],
+      "args": ["src/index.ts"],
+      "cwd": "${workspaceFolder}/backend",
+      "envFile": "${workspaceFolder}/backend/.env",
+      "sourceMaps": true,
+      "skipFiles": ["<node_internals>/**", "**/node_modules/**"],
+      "outFiles": ["${workspaceFolder}/backend/dist/**/*.js"],
+      "resolveSourceMapLocations": [
+        "${workspaceFolder}/backend/**",
+        "!**/node_modules/**"
+      ]
+    },
+    {
+      // nodemon이 실행 중일 때 --inspect 플래그로 attach
+      "name": "Debug: Backend (Attach)",
+      "type": "node",
+      "request": "attach",
+      "port": 9229,
+      "restart": true,
+      "sourceMaps": true,
+      "skipFiles": ["<node_internals>/**", "**/node_modules/**"],
+      "outFiles": ["${workspaceFolder}/backend/dist/**/*.js"],
+      "resolveSourceMapLocations": [
+        "${workspaceFolder}/backend/**",
+        "!**/node_modules/**"
+      ]
+    },
+
+    // ── 프론트엔드 ─────────────────────────────────────────────────────────
+    {
+      // Next.js 서버 사이드 (SSR, API Routes, Server Actions) 디버깅
+      "name": "Debug: Frontend (Server)",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["--inspect=9230"],
+      "args": [
+        "${workspaceFolder}/frontend/node_modules/next/dist/bin/next",
+        "dev"
+      ],
+      "cwd": "${workspaceFolder}/frontend",
+      "envFile": "${workspaceFolder}/frontend/.env.local",
+      "sourceMaps": true,
+      "skipFiles": ["<node_internals>/**"],
+      "serverReadyAction": {
+        "action": "openExternally",
+        "pattern": "- Local:.+(https?://.+)"
+      }
+    },
+    {
+      // 클라이언트 사이드 React 컴포넌트 디버깅 (브라우저)
+      "name": "Debug: Frontend (Browser)",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:3000",
+      "webRoot": "${workspaceFolder}/frontend",
+      "sourceMapPathOverrides": {
+        "webpack://_N_E/*": "${webRoot}/*",
+        "webpack:///./*": "${webRoot}/*"
+      }
+    }
+  ],
+
+  "compounds": [
+    {
+      // 백엔드 + 브라우저 동시 디버깅 (개발 서버는 별도 터미널에서 실행)
+      "name": "Full Stack: Debug",
+      "configurations": ["Debug: Backend (Attach)", "Debug: Frontend (Browser)"],
+      "presentation": {
+        "hidden": false,
+        "group": "fullstack",
+        "order": 1
+      }
+    }
+  ]
+}

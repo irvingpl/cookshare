@@ -1,0 +1,55 @@
+{
+  // TypeScript — Next.js 플러그인이 포함된 frontend TS SDK 사용
+  "typescript.tsdk": "frontend/node_modules/typescript/lib",
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+
+  // 저장 시 포맷 + ESLint 자동 수정
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+
+  // ESLint — frontend 디렉토리를 작업 디렉토리로 지정
+  "eslint.workingDirectories": [
+    { "directory": "frontend", "changeProcessCWD": true }
+  ],
+
+  // Tailwind CSS IntelliSense — cva/cn/cx 헬퍼 함수에서도 클래스 자동완성 활성화
+  "tailwindCSS.experimental.classRegex": [
+    ["cva\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"],
+    ["cn\\(([^)]*)\\)", "(?:'|\"|`)([^']*)(?:'|\"|`)"],
+    ["cx\\(([^)]*)\\)", "(?:'|\"|`)([^']*)(?:'|\"|`)"]
+  ],
+  "tailwindCSS.includeLanguages": {
+    "typescript": "javascript",
+    "typescriptreact": "javascript"
+  },
+
+  // 언어별 포매터 명시
+  "[typescript]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+  "[typescriptreact]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+  "[json]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+
+  // 탐색기에서 빌드 산출물 숨김
+  "files.exclude": {
+    "**/node_modules": true,
+    "**/.next": true,
+    "**/dist": true,
+    "**/*.tsbuildinfo": true
+  },
+
+  // 검색에서 제외 (node_modules, 빌드 결과물, lockfile)
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/.next": true,
+    "**/dist": true,
+    "**/pnpm-lock.yaml": true
+  },
+
+  // SQLite 뷰어 — DB 파일 연결
+  "sqliteExplorer.databaseExtensions": ["db"],
+
+  // Thunder Client — 공유 컬렉션을 레포지토리에 포함
+  "thunder-client.saveToWorkspace": true
+}

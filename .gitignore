@@ -24,6 +24,11 @@ backend/src/uploads/*
 .DS_Store
 Thumbs.db
 
-# editor
-.vscode/
+# editor — 개인 설정(*.vsix, launch-local)은 제외, 공유 설정은 커밋
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/launch.json
+!.vscode/tasks.json
+!.vscode/*.code-snippets
 .idea/
