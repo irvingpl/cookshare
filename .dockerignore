@@ -1,0 +1,40 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# 의존성 (컨테이너에서 설치)
+node_modules
+**/node_modules
+
+# 빌드 산출물
+dist
+**/dist
+.next
+**/.next
+**/*.tsbuildinfo
+
+# 런타임 데이터
+*.db
+*.db-shm
+*.db-wal
+backend/src/uploads/*
+!backend/src/uploads/.gitkeep
+
+# 환경 변수 (compose env_file로 주입)
+.env
+.env.local
+**/.env
+**/.env.local
+
+# 에디터
+.vscode
+.idea
+
+# OS
+.DS_Store
+Thumbs.db
+
+# README / 문서
+README.md
+docs/

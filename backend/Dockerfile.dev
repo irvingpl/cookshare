@@ -1,0 +1,33 @@
+FROM node:22-alpine
+
+# 네이티브 모듈 컴파일에 필요한 도구 (better-sqlite3, sharp)
+RUN apk add --no-cache python3 make g++
+
+# pnpm 활성화
+RUN corepack enable && corepack prepare pnpm@11 --activate
+
+WORKDIR /app
+
+# ── 의존성 설치 레이어 (package 파일이 바뀔 때만 재실행) ──────────────────
+COPY pnpm-workspace.yaml pnpm-lock.yaml package.json ./
+COPY packages/shared/package.json ./packages/shared/
+COPY backend/package.json ./backend/
+
+RUN pnpm install --filter cookshare-backend --filter @cookshare/shared --frozen-lockfile
+
+# ── shared 타입 사전 빌드 ─────────────────────────────────────────────────
+# 소스는 볼륨으로 마운트되므로 런타임에도 다시 빌드
+COPY packages/shared/src ./packages/shared/src
+COPY packages/shared/tsconfig.json ./packages/shared/
+
+RUN pnpm --filter @cookshare/shared build
+
+# ── 소스는 볼륨 마운트로 제공 (hot reload) ───────────────────────────────
+# CMD 단계에서 소스 변경을 감지해 자동 재시작
+
+EXPOSE 4000
+# 디버거 포트
+EXPOSE 9229
+
+# shared 재빌드 후 dev 서버 시작 (볼륨 마운트로 소스 오버레이)
+CMD ["sh", "-c", "pnpm --filter @cookshare/shared build && pnpm --filter cookshare-backend dev"]

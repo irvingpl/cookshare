@@ -1,0 +1,22 @@
+FROM node:22-alpine
+
+# sharp(이미지 최적화)가 Alpine에서 컴파일되도록 빌드 도구 포함
+RUN apk add --no-cache python3 make g++ libc6-compat
+
+# pnpm 활성화
+RUN corepack enable && corepack prepare pnpm@11 --activate
+
+WORKDIR /app
+
+# ── 의존성 설치 레이어 ────────────────────────────────────────────────────
+COPY pnpm-workspace.yaml pnpm-lock.yaml package.json ./
+COPY packages/shared/package.json ./packages/shared/
+COPY frontend/package.json ./frontend/
+
+RUN pnpm install --filter frontend --filter @cookshare/shared --frozen-lockfile
+
+# ── 소스는 볼륨 마운트로 제공 (hot reload) ───────────────────────────────
+
+EXPOSE 3000
+
+CMD ["pnpm", "--filter", "frontend", "dev"]

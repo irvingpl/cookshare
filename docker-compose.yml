@@ -1,0 +1,100 @@
+name: cookshare
+
+# ── 공통 설정 ─────────────────────────────────────────────────────────────
+x-node-modules-volumes: &node-modules-volumes
+  # node_modules는 컨테이너 내부 것 사용 (바이너리 플랫폼 차이 방지)
+  # 익명 볼륨이 바인드 마운트보다 우선됨
+  - /app/node_modules
+  - /app/packages/shared/node_modules
+
+services:
+  # ── 백엔드 ──────────────────────────────────────────────────────────────
+  backend:
+    build:
+      context: . # 모노레포 루트 (shared 패키지 포함)
+      dockerfile: backend/Dockerfile.dev
+    container_name: cookshare-backend
+    ports:
+      - '4000:4000' # API 서버
+      - '9229:9229' # Node.js 디버거 (VS Code Attach)
+    volumes:
+      # 1. 소스 코드 전체 마운트 (hot reload)
+      - .:/app
+      # 2. node_modules 보호 (컨테이너 빌드 시 설치된 것 사용)
+      - *node-modules-volumes
+      - /app/backend/node_modules
+      # 3. SQLite DB 영속 (소스 디렉토리와 분리)
+      - backend_db:/app/data
+      # 4. 업로드 파일 영속
+      - backend_uploads:/app/backend/src/uploads
+    environment:
+      NODE_ENV: development
+      # DB를 소스 밖 전용 볼륨에 저장
+      DB_PATH: /app/data/cookshare.db
+      UPLOAD_DIR: ./src/uploads
+      BASE_URL: http://localhost:4000
+      CLIENT_URL: http://localhost:3000
+    env_file:
+      # .env 파일이 있으면 위 environment보다 낮은 우선순위로 적용
+      - path: ./backend/.env
+        required: false
+    networks:
+      - cookshare-net
+    restart: unless-stopped
+    healthcheck:
+      test: ['CMD-SHELL', 'wget -qO- http://localhost:4000/health || exit 1']
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
+  # ── 프론트엔드 ──────────────────────────────────────────────────────────
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile.dev
+    container_name: cookshare-frontend
+    ports:
+      - '3000:3000'
+    volumes:
+      # 1. 소스 코드 전체 마운트 (hot reload)
+      - .:/app
+      # 2. node_modules 보호
+      - *node-modules-volumes
+      - /app/frontend/node_modules
+      # 3. Next.js 빌드 캐시 영속 (재시작 빠르게)
+      - frontend_next:/app/frontend/.next
+    environment:
+      NODE_ENV: development
+      # 브라우저에서 직접 백엔드 호출 (로컬호스트 포트 노출)
+      NEXT_PUBLIC_API_URL: http://localhost:4000
+      # Mac/Windows Docker Desktop 환경에서 파일 감시가 안 될 때 주석 해제
+      # WATCHPACK_POLLING: "true"
+      # CHOKIDAR_USEPOLLING: "true"
+    networks:
+      - cookshare-net
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+
+# ── 네트워크 ──────────────────────────────────────────────────────────────
+networks:
+  cookshare-net:
+    driver: bridge
+    name: cookshare-dev
+    # 서비스 간 hostname으로 접근 가능: http://backend:4000, http://frontend:3000
+
+# ── 볼륨 ──────────────────────────────────────────────────────────────────
+volumes:
+  # SQLite 데이터베이스 파일 (컨테이너 재시작 후에도 유지)
+  backend_db:
+    driver: local
+
+  # 업로드된 이미지 파일 (컨테이너 재시작 후에도 유지)
+  backend_uploads:
+    driver: local
+
+  # Next.js 빌드 캐시 (.next/) — 재시작 시 전체 재빌드 방지
+  frontend_next:
+    driver: local

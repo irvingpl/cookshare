@@ -1,0 +1,30 @@
+# 프로덕션 오버라이드
+# 사용: docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+#
+# 주의: backend/Dockerfile, frontend/Dockerfile (dev 없이) 를 별도 작성해야 함
+
+name: cookshare
+
+services:
+  backend:
+    build:
+      dockerfile: backend/Dockerfile # 프로덕션 Dockerfile (미작성)
+    environment:
+      NODE_ENV: production
+    restart: always
+    # 프로덕션에서는 소스 마운트 제거
+    volumes:
+      - backend_db:/app/data
+      - backend_uploads:/app/backend/src/uploads
+
+  frontend:
+    build:
+      dockerfile: frontend/Dockerfile # 프로덕션 Dockerfile (미작성)
+    environment:
+      NODE_ENV: production
+    restart: always
+    volumes: []
+
+volumes:
+  backend_db:
+  backend_uploads:
