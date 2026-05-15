@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { api } from '@/lib/api';
@@ -28,10 +28,13 @@ export default function NewRecipePage() {
   const [category, setCategory] = useState('');
   const [image, setImage] = useState<File | null>(null);
 
-  if (!user) {
-    router.push('/login');
-    return null;
-  }
+  useEffect(() => {
+    if (!isLoading && !user) {
+      router.push('/login');
+    }
+  }, [user, isLoading, router]);
+
+  if (!user) return null;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();

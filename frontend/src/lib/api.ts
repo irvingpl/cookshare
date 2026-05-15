@@ -39,8 +39,9 @@ async function refreshAccessToken(): Promise<string> {
 
     if (!res.ok) {
       clearTokens();
-      // 페이지 컴포넌트가 아닌 곳에서 강제 이동이 필요할 때 이벤트로 전달
-      window.dispatchEvent(new Event('auth:logout'));
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new Event('auth:logout'));
+      }
       throw new Error('토큰 갱신에 실패했습니다. 다시 로그인해주세요.');
     }
 
