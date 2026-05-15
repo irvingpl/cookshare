@@ -1,0 +1,29 @@
+# dependencies
+node_modules/
+
+# build output
+dist/
+frontend/.next/
+frontend/tsconfig.tsbuildinfo
+
+# env files
+.env
+.env.local
+.env.*.local
+
+# database
+*.db
+*.db-shm
+*.db-wal
+
+# uploads (keep directory structure)
+backend/src/uploads/*
+!backend/src/uploads/.gitkeep
+
+# OS
+.DS_Store
+Thumbs.db
+
+# editor
+.vscode/
+.idea/
