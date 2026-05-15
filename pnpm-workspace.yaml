@@ -1,0 +1,9 @@
+packages:
+  - 'packages/*'
+  - 'backend'
+  - 'frontend'
+allowBuilds:
+  better-sqlite3: true
+  msw: true
+  sharp: true
+  unrs-resolver: true
