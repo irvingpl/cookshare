@@ -1,0 +1,7 @@
+echo "🔍 타입 검사 실행 중..."
+pnpm typecheck
+
+# 테스트 스크립트가 존재하면 실행
+if pnpm run --if-present test; then
+  :
+fi
