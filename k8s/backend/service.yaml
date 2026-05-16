@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend
+  namespace: cookshare
+  labels:
+    app: backend
+spec:
+  selector:
+    app: backend
+  ports:
+    - name: http
+      port: 4000
+      targetPort: 4000
+      protocol: TCP
+    - name: debugger
+      port: 9229
+      targetPort: 9229
+      protocol: TCP
+  # ClusterIP: 클러스터 내부 접근 + kubectl port-forward로 로컬 접근
+  type: ClusterIP

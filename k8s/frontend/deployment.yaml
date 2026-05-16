@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  namespace: cookshare
+  labels:
+    app: frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+        - name: frontend
+          image: cookshare/frontend:dev
+          imagePullPolicy: Never
+          ports:
+            - name: http
+              containerPort: 3000
+              protocol: TCP
+
+          envFrom:
+            - configMapRef:
+                name: frontend-config
+
+          # ── 헬스 체크 ──────────────────────────────────────────────────
+          # startupProbe: Next.js dev 서버 기동 시간 확보 (최대 3분)
+          startupProbe:
+            httpGet:
+              path: /
+              port: 3000
+            failureThreshold: 36
+            periodSeconds: 5
+
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            failureThreshold: 3
+
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            failureThreshold: 3
+
+          # ── 리소스 제한 ────────────────────────────────────────────────
+          # Next.js dev 서버는 메모리를 많이 사용함
+          resources:
+            requests:
+              cpu: '200m'
+              memory: '512Mi'
+            limits:
+              cpu: '1000m'
+              memory: '1Gi'
+
+      terminationGracePeriodSeconds: 10

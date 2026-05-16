@@ -1,0 +1,57 @@
+# 사전 조건:
+#   minikube: minikube addons enable ingress
+#   kind:     kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml
+#
+# /etc/hosts 에 추가:
+#   minikube: echo "$(minikube ip) cookshare.local" | sudo tee -a /etc/hosts
+#   kind:     echo "127.0.0.1 cookshare.local" | sudo tee -a /etc/hosts
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: cookshare
+  namespace: cookshare
+  annotations:
+    # 업로드 파일 크기 제한 (이미지)
+    nginx.ingress.kubernetes.io/proxy-body-size: '50m'
+    nginx.ingress.kubernetes.io/proxy-read-timeout: '60'
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: cookshare.local
+      http:
+        paths:
+          # /api/* → backend:4000  (prefix 그대로 전달, rewrite 없음)
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: backend
+                port:
+                  number: 4000
+
+          # /uploads/* → backend:4000 (정적 파일)
+          - path: /uploads
+            pathType: Prefix
+            backend:
+              service:
+                name: backend
+                port:
+                  number: 4000
+
+          # /health → backend:4000 (헬스 체크 외부 노출)
+          - path: /health
+            pathType: Exact
+            backend:
+              service:
+                name: backend
+                port:
+                  number: 4000
+
+          # /* → frontend:3000
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: frontend
+                port:
+                  number: 3000

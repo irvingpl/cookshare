@@ -24,6 +24,9 @@ backend/src/uploads/*
 .DS_Store
 Thumbs.db
 
+# k8s — 실제 시크릿은 커밋하지 않음 (secret.yaml은 예시값이므로 예외적으로 허용)
+# 실제 운영 시: k8s/secret.yaml을 .gitignore에 추가하고 별도 관리
+
 # editor — 개인 설정(*.vsix, launch-local)은 제외, 공유 설정은 커밋
 .vscode/*
 !.vscode/extensions.json

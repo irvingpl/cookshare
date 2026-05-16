@@ -1,0 +1,104 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  namespace: cookshare
+  labels:
+    app: backend
+spec:
+  # SQLite는 ReadWriteOnce PVC → 단일 파드만 허용
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend
+  strategy:
+    # Recreate: 기존 파드를 먼저 종료 후 새 파드 시작 (PVC 충돌 방지)
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      # ── 초기화 컨테이너 ─────────────────────────────────────────────────
+      initContainers:
+        - name: init-dirs
+          image: busybox:1.36
+          command:
+            - sh
+            - -c
+            - |
+              mkdir -p /data/uploads
+              echo "✅ /data/uploads 디렉토리 준비 완료"
+          volumeMounts:
+            - name: backend-data
+              mountPath: /data
+
+      # ── 메인 컨테이너 ───────────────────────────────────────────────────
+      containers:
+        - name: backend
+          # 이미지 빌드 방법은 k8s/README 참고
+          image: cookshare/backend:dev
+          imagePullPolicy: Never # 로컬 이미지 사용 (minikube / kind load)
+          ports:
+            - name: http
+              containerPort: 4000
+              protocol: TCP
+            - name: debugger
+              containerPort: 9229
+              protocol: TCP
+
+          # 환경 변수
+          envFrom:
+            - configMapRef:
+                name: backend-config
+            - secretRef:
+                name: backend-secret
+
+          # 볼륨 마운트
+          volumeMounts:
+            - name: backend-data
+              mountPath: /data
+
+          # ── 헬스 체크 ──────────────────────────────────────────────────
+          # startupProbe: 앱 기동 시간 확보 (ts-node 컴파일 포함, 최대 150s)
+          startupProbe:
+            httpGet:
+              path: /health
+              port: 4000
+            failureThreshold: 30
+            periodSeconds: 5
+
+          # readinessProbe: 트래픽 수신 가능 여부
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 4000
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 3
+
+          # livenessProbe: 파드 재시작 여부
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 4000
+            initialDelaySeconds: 30
+            periodSeconds: 20
+            failureThreshold: 3
+
+          # ── 리소스 제한 ────────────────────────────────────────────────
+          resources:
+            requests:
+              cpu: '100m'
+              memory: '256Mi'
+            limits:
+              cpu: '500m'
+              memory: '512Mi'
+
+      volumes:
+        - name: backend-data
+          persistentVolumeClaim:
+            claimName: backend-data
+
+      # 그레이스풀 종료 대기 (DB 트랜잭션 완료)
+      terminationGracePeriodSeconds: 30

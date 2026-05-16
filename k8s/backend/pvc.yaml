@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: backend-data
+  namespace: cookshare
+  labels:
+    app: backend
+spec:
+  # SQLite는 단일 라이터만 허용하므로 ReadWriteOnce
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
+  # storageClassName 미지정 → 클러스터 기본값 사용
+  # minikube: standard (hostPath)
+  # kind:     standard (local-path-provisioner)
